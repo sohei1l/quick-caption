@@ -59,7 +59,7 @@ def create_interface():
             with gr.Row():
                 image_input = gr.Image(type="pil", label="Upload an image")
                 with gr.Column():
-                    caption_output = gr.Textbox(label="Generated Caption", lines=3)
+                    caption_output = gr.Textbox(label="Generated Caption", lines=3, show_copy_button=True)
                     confidence_output = gr.Textbox(label="Confidence Score", lines=1)
             
             image_input.change(fn=generate_caption, inputs=image_input, outputs=[caption_output, confidence_output])
@@ -69,7 +69,7 @@ def create_interface():
             with gr.Row():
                 analysis_image_input = gr.Image(type="pil", label="Upload an image")
                 with gr.Column():
-                    analysis_caption_output = gr.Textbox(label="Generated Caption", lines=3)
+                    analysis_caption_output = gr.Textbox(label="Generated Caption", lines=3, show_copy_button=True)
                     analysis_confidence_output = gr.Textbox(label="Confidence Score", lines=1)
                     quality_metrics_output = gr.Textbox(label="Image Quality Metrics", lines=6)
             
