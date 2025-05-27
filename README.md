@@ -4,8 +4,10 @@ Small, fast, and useful: drop an image, get a crisp accessibility caption powere
 
 ## Features
 - 🖼️ Drag-and-drop image captioning
+- 📊 Confidence scoring for caption reliability
+- 🔍 Image quality analysis (brightness, contrast, sharpness)
 - 📦 Batch processing with ZIP uploads
-- 📊 CSV export for bulk operations
+- 📄 CSV export for bulk operations
 - 🚀 Powered by Salesforce BLIP model
 - ☁️ Ready for Hugging Face Spaces deployment
 
@@ -31,5 +33,7 @@ Then open your browser to the provided URL and start captioning images!
 ## Model Information
 This application uses the Salesforce BLIP (Bootstrapping Language-Image Pre-training) model for image captioning. The model generates human-readable descriptions that are perfect for accessibility purposes.
 
-## Total Lines of Code
-Approximately 50 lines of core functionality - keeping it simple and focused!
+## Advanced Features
+- **Confidence Scoring**: Each caption comes with a confidence percentage indicating the model's certainty
+- **Image Quality Analysis**: Automatic assessment of brightness, contrast, sharpness, and resolution
+- **Detailed Analysis Tab**: Comprehensive view combining captions with quality metrics for professional use
