@@ -33,3 +33,6 @@ flagged/
 .venv
 env/
 venv/
+
+# Claude development notes
+CLAUDE.md
