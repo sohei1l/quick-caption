@@ -19,9 +19,3 @@ Try QuickCaption now: **[https://sohei1l.github.io/quick-caption/](https://sohei
 pip install -r requirements.txt
 python app.py
 ```
-
-Includes batch processing and the full Gradio interface.
-
-### ☁️ Cloud Deployment
-
-Deploy to Hugging Face Spaces or other cloud platforms using the included `Dockerfile`.
