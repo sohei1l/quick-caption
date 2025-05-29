@@ -34,5 +34,6 @@ flagged/
 env/
 venv/
 
-# Claude development notes
+# Development notes
 CLAUDE.md
+.DS_Store
