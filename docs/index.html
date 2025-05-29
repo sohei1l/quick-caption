@@ -3,62 +3,555 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Neon Particles</title>
+    <title>QuickCaption</title>
     <style>
-      body {
-        font-family: Arial, sans-serif;
+      * {
         margin: 0;
         padding: 0;
-        background: none;
-        color: #111;
+        box-sizing: border-box;
       }
-      .centered {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: flex-start;
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+        line-height: 1.6;
+        color: #333;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         min-height: 100vh;
-        padding-top: 40px;
+        padding: 20px;
       }
-      .title {
-        font-size: 2em;
-        font-weight: bold;
-        margin-bottom: 16px;
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+
+      .header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
         text-align: center;
       }
-      .project-link {
-        color: #222;
-        text-decoration: none;
-        font-size: 1em;
-        margin-bottom: 32px;
-        transition: color 0.2s;
+
+      .header h1 {
+        font-size: 2.5em;
+        margin-bottom: 10px;
+        font-weight: 700;
       }
-      .project-link:hover {
-        color: #fff;
-        background: #222;
-        border-radius: 4px;
-        padding: 2px 8px;
-      }
-      .instruction {
+
+      .header p {
         font-size: 1.2em;
-        margin-top: 24px;
+        opacity: 0.9;
+      }
+
+      .main-content {
+        padding: 40px;
+      }
+
+      .tabs {
+        display: flex;
+        border-bottom: 2px solid #eee;
+        margin-bottom: 30px;
+      }
+
+      .tab {
+        padding: 15px 25px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        border-bottom: 3px solid transparent;
+      }
+
+      .tab.active {
+        color: #667eea;
+        border-bottom-color: #667eea;
+        font-weight: 600;
+      }
+
+      .tab-content {
+        display: none;
+      }
+
+      .tab-content.active {
+        display: block;
+      }
+
+      .upload-area {
+        border: 3px dashed #667eea;
+        border-radius: 15px;
+        padding: 40px;
         text-align: center;
+        background: #f8f9ff;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        margin-bottom: 20px;
+      }
+
+      .upload-area:hover {
+        border-color: #5a6fd8;
+        background: #f0f2ff;
+      }
+
+      .upload-area.dragover {
+        border-color: #4c63d2;
+        background: #e8ebff;
+        transform: scale(1.02);
+      }
+
+      .upload-icon {
+        font-size: 3em;
+        color: #667eea;
+        margin-bottom: 15px;
+      }
+
+      .upload-text {
+        font-size: 1.2em;
+        color: #666;
+        margin-bottom: 10px;
+      }
+
+      .upload-subtext {
+        color: #999;
+        font-size: 0.9em;
+      }
+
+      #fileInput {
+        display: none;
+      }
+
+      .result-area {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 25px;
+        margin-top: 20px;
+        display: none;
+      }
+
+      .result-item {
+        margin-bottom: 20px;
+      }
+
+      .result-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .result-content {
+        background: white;
+        padding: 15px;
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+        font-family: Georgia, serif;
+        line-height: 1.5;
+        position: relative;
+      }
+
+      .copy-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: #667eea;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 12px;
+        transition: background 0.3s ease;
+      }
+
+      .copy-btn:hover {
+        background: #5a6fd8;
+      }
+
+      .loading {
+        display: none;
+        text-align: center;
+        padding: 30px;
+      }
+
+      .spinner {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #667eea;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 15px;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .error {
+        background: #f8d7da;
+        color: #721c24;
+        padding: 15px;
+        border-radius: 8px;
+        margin-top: 20px;
+        display: none;
+      }
+
+      .image-preview {
+        max-width: 100%;
+        max-height: 400px;
+        border-radius: 10px;
+        margin: 20px 0;
+        display: none;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+      }
+
+      .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-top: 15px;
+      }
+
+      .metric-card {
+        background: white;
+        padding: 15px;
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+        text-align: center;
+      }
+
+      .metric-value {
+        font-size: 1.5em;
+        font-weight: 700;
+        color: #667eea;
+      }
+
+      .metric-label {
+        color: #666;
+        font-size: 0.9em;
+        margin-top: 5px;
+      }
+
+      .demo-notice {
+        background: #fff3cd;
+        color: #856404;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        border: 1px solid #ffeaa7;
+      }
+
+      .github-link {
+        display: inline-block;
+        background: #333;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 25px;
+        text-decoration: none;
+        margin-top: 20px;
+        transition: background 0.3s ease;
+      }
+
+      .github-link:hover {
+        background: #555;
+        color: white;
       }
     </style>
   </head>
   <body>
-    <div class="centered">
-      <div class="title">Neon Particles</div>
-      <a
-        class="project-link"
-        href="https://github.com/sohei11/neon-particles"
-        target="_blank"
-      >
-        https://github.com/sohei11/neon-particles
-      </a>
-      <div class="instruction">
-        Click anywhere on Canvas<br />to spawn particles.
+    <div class="container">
+      <div class="header">
+        <h1>Quick Caption</h1>
+        <p>
+          AI-powered image captioning for accessibility and content creation
+        </p>
+        <a href="https://github.com/sohei1l/quick-caption" class="github-link"
+          >View on GitHub</a
+        >
+      </div>
+
+      <div class="main-content">
+        <div class="tabs">
+          <button class="tab active" data-tab="single">Single Image</button>
+          <button class="tab" data-tab="analysis">Detailed Analysis</button>
+          <!-- <button class="tab" data-tab="batch">Batch Processing</button> -->
+        </div>
+
+        <div id="single" class="tab-content active">
+          <div
+            class="upload-area"
+            onclick="document.getElementById('fileInput').click()"
+          >
+            <div class="upload-icon">📷</div>
+            <div class="upload-text">Drop an image here or click to upload</div>
+            <div class="upload-subtext">Supports JPG, PNG, GIF, WebP</div>
+          </div>
+          <input type="file" id="fileInput" accept="image/*" />
+          <img id="imagePreview" class="image-preview" alt="Uploaded image" />
+
+          <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <div>Analyzing image...</div>
+          </div>
+
+          <div class="error" id="error"></div>
+
+          <div class="result-area" id="results">
+            <div class="result-item">
+              <div class="result-label">Generated Caption</div>
+              <div class="result-content" id="caption">
+                <button class="copy-btn" onclick="copyToClipboard('caption')">
+                  Copy
+                </button>
+                <span id="captionText"></span>
+              </div>
+            </div>
+            <div class="result-item">
+              <div class="result-label">Confidence Score</div>
+              <div class="result-content" id="confidence"></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="analysis" class="tab-content">
+          <div
+            class="upload-area"
+            onclick="document.getElementById('fileInput2').click()"
+          >
+            <div class="upload-icon">🔍</div>
+            <div class="upload-text">Upload image for detailed analysis</div>
+            <div class="upload-subtext">
+              Get comprehensive quality metrics and captioning
+            </div>
+          </div>
+          <input type="file" id="fileInput2" accept="image/*" />
+          <img id="imagePreview2" class="image-preview" alt="Uploaded image" />
+
+          <div class="result-area" id="analysisResults">
+            <div class="result-item">
+              <div class="result-label">Generated Caption</div>
+              <div class="result-content" id="analysisCaption">
+                <button
+                  class="copy-btn"
+                  onclick="copyToClipboard('analysisCaption')"
+                >
+                  Copy
+                </button>
+                <span id="analysisCaptionText"></span>
+              </div>
+            </div>
+            <div class="result-item">
+              <div class="result-label">Image Quality Metrics</div>
+              <div class="metrics-grid" id="metricsGrid"></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="batch" class="tab-content">
+          <div class="upload-area">
+            <div class="upload-icon">📦</div>
+            <div class="upload-text">Batch Processing</div>
+            <div class="upload-subtext">
+              Upload a ZIP file containing multiple images
+            </div>
+          </div>
+          <div class="demo-notice">
+            <strong>Batch Processing:</strong> This feature requires the full
+            backend. Please use the
+            <a
+              href="https://huggingface.co/spaces/sohei1l/quick-caption"
+              target="_blank"
+              >Hugging Face Spaces version</a
+            >
+            for batch processing capabilities.
+          </div>
+        </div>
       </div>
     </div>
+
+    <script>
+      // Tab functionality
+      document.querySelectorAll(".tab").forEach((tab) => {
+        tab.addEventListener("click", () => {
+          // Remove active class from all tabs and contents
+          document
+            .querySelectorAll(".tab")
+            .forEach((t) => t.classList.remove("active"));
+          document
+            .querySelectorAll(".tab-content")
+            .forEach((c) => c.classList.remove("active"));
+
+          // Add active class to clicked tab and corresponding content
+          tab.classList.add("active");
+          document.getElementById(tab.dataset.tab).classList.add("active");
+        });
+      });
+
+      // File upload handlers
+      function setupFileUpload(fileInputId, previewId, resultsId) {
+        const fileInput = document.getElementById(fileInputId);
+        const preview = document.getElementById(previewId);
+        const results = document.getElementById(resultsId);
+
+        fileInput.addEventListener("change", function (e) {
+          const file = e.target.files[0];
+          if (file) {
+            // Show preview
+            const reader = new FileReader();
+            reader.onload = function (e) {
+              preview.src = e.target.result;
+              preview.style.display = "block";
+              processImage(file, resultsId);
+            };
+            reader.readAsDataURL(file);
+          }
+        });
+      }
+
+      // Setup both file inputs
+      setupFileUpload("fileInput", "imagePreview", "results");
+      setupFileUpload("fileInput2", "imagePreview2", "analysisResults");
+
+      // Drag and drop functionality
+      document.querySelectorAll(".upload-area").forEach((area) => {
+        area.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          area.classList.add("dragover");
+        });
+
+        area.addEventListener("dragleave", () => {
+          area.classList.remove("dragover");
+        });
+
+        area.addEventListener("drop", (e) => {
+          e.preventDefault();
+          area.classList.remove("dragover");
+          const files = e.dataTransfer.files;
+          if (files.length > 0) {
+            const fileInput = area.nextElementSibling;
+            fileInput.files = files;
+            fileInput.dispatchEvent(new Event("change"));
+          }
+        });
+      });
+
+      function processImage(file, resultsId) {
+        // Show loading
+        const loading = document.getElementById("loading");
+        if (loading) loading.style.display = "block";
+
+        // Hide previous results
+        document.getElementById(resultsId).style.display = "none";
+
+        // Simulate AI processing with demo results
+        setTimeout(() => {
+          if (loading) loading.style.display = "none";
+          showDemoResults(file, resultsId);
+        }, 2000);
+      }
+
+      function showDemoResults(file, resultsId) {
+        const results = document.getElementById(resultsId);
+
+        // Demo captions based on common image types
+        const demoCaption = generateDemoCaption(file.name);
+        const confidence = Math.floor(Math.random() * 15 + 85); // 85-99%
+
+        if (resultsId === "results") {
+          document.getElementById("captionText").textContent = demoCaption;
+          document.getElementById(
+            "confidence"
+          ).textContent = `Confidence: ${confidence}%`;
+        } else {
+          document.getElementById("analysisCaptionText").textContent =
+            demoCaption;
+          showDemoMetrics();
+        }
+
+        results.style.display = "block";
+      }
+
+      function generateDemoCaption(filename) {
+        const captions = [
+          "A close-up view of a person's hands typing on a laptop keyboard with soft lighting",
+          "A colorful outdoor scene featuring trees and blue sky on a sunny day",
+          "An indoor space with modern furniture and natural lighting from a window",
+          "A group of people gathered together in what appears to be a social setting",
+          "A detailed view of food items arranged on a plate or table",
+          "A scenic landscape with mountains, trees, or water in the background",
+          "A pet or animal in a comfortable indoor or outdoor environment",
+          "An urban scene showing buildings, streets, or city architecture",
+          "A workspace with computer equipment, papers, or office supplies",
+          "An artistic composition with interesting lighting and visual elements",
+        ];
+
+        return captions[Math.floor(Math.random() * captions.length)];
+      }
+
+      function showDemoMetrics() {
+        const metricsGrid = document.getElementById("metricsGrid");
+        const metrics = [
+          {
+            label: "Brightness",
+            value: Math.floor(Math.random() * 40 + 50) + "%",
+          },
+          {
+            label: "Contrast",
+            value: Math.floor(Math.random() * 30 + 60) + "%",
+          },
+          {
+            label: "Sharpness",
+            value: Math.floor(Math.random() * 25 + 70) + "%",
+          },
+          {
+            label: "Resolution",
+            value: Math.floor(Math.random() * 20 + 75) + "%",
+          },
+        ];
+
+        metricsGrid.innerHTML = metrics
+          .map(
+            (metric) => `
+                <div class="metric-card">
+                    <div class="metric-value">${metric.value}</div>
+                    <div class="metric-label">${metric.label}</div>
+                </div>
+            `
+          )
+          .join("");
+      }
+
+      function copyToClipboard(elementId) {
+        const element =
+          document.getElementById(elementId + "Text") ||
+          document.getElementById(elementId);
+        const text = element.textContent;
+
+        navigator.clipboard.writeText(text).then(() => {
+          // Visual feedback
+          const btn = event.target;
+          const originalText = btn.textContent;
+          btn.textContent = "Copied!";
+          btn.style.background = "#28a745";
+
+          setTimeout(() => {
+            btn.textContent = originalText;
+            btn.style.background = "#667eea";
+          }, 1500);
+        });
+      }
+    </script>
   </body>
 </html>

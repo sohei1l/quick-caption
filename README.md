@@ -23,27 +23,6 @@ pip install -r requirements.txt
 python app.py
 ```
 
-### For Mac (my setup)
-
-1. Ensure you have Python 3.8+ installed. On macOS, you can use Homebrew:
-   ```bash
-   brew install python
-   ```
-2. (Optional but recommended) Create a virtual environment:
-   ```bash
-   python3 -m venv venv
-   source venv/bin/activate
-   ```
-3. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-4. Run the app:
-   ```bash
-   python app.py
-   ```
-5. Open your browser to the provided URL to start captioning images.
-
 ## Model Information
 
 This application uses the Salesforce BLIP (Bootstrapping Language-Image Pre-training) model for image captioning. The model generates human-readable descriptions that are perfect for accessibility purposes.
