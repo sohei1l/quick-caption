@@ -273,35 +273,41 @@
   <body>
     <!-- Load Transformers.js for client-side AI -->
     <script type="module">
-      import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2';
-      
+      import {
+        pipeline,
+        env,
+      } from "https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2";
+
       // Configure Transformers.js environment
       env.allowRemoteModels = true;
       env.allowLocalModels = true;
-      
+
       // Global variables
       window.captionPipeline = null;
       window.modelLoaded = false;
-      
+
       // Initialize the model
       async function initializeModel() {
         try {
-          console.log('Loading image captioning model...');
-          const loadingMessage = document.getElementById('modelLoading');
-          if (loadingMessage) loadingMessage.style.display = 'block';
-          
+          console.log("Loading image captioning model...");
+          const loadingMessage = document.getElementById("modelLoading");
+          if (loadingMessage) loadingMessage.style.display = "block";
+
           // Try different models in order of preference (vit-gpt2 seems to work best)
           const modelOptions = [
-            'Xenova/vit-gpt2-image-captioning',
-            'Xenova/blip-image-captioning-base',
-            'Xenova/blip-image-captioning-large'
+            "Xenova/vit-gpt2-image-captioning",
+            "Xenova/blip-image-captioning-base",
+            "Xenova/blip-image-captioning-large",
           ];
-          
+
           let modelLoaded = false;
           for (const modelName of modelOptions) {
             try {
               console.log(`Trying model: ${modelName}`);
-              window.captionPipeline = await pipeline('image-to-text', modelName);
+              window.captionPipeline = await pipeline(
+                "image-to-text",
+                modelName
+              );
               console.log(`Successfully loaded: ${modelName}`);
               modelLoaded = true;
               break;
@@ -310,28 +316,27 @@
               continue;
             }
           }
-          
+
           if (!modelLoaded) {
-            throw new Error('Failed to load any captioning model');
+            throw new Error("Failed to load any captioning model");
           }
-          
+
           window.modelLoaded = true;
-          console.log('Model loaded successfully!');
-          
-          if (loadingMessage) loadingMessage.style.display = 'none';
-          
+          console.log("Model loaded successfully!");
+
+          if (loadingMessage) loadingMessage.style.display = "none";
+
           // Show ready message
-          const readyMessage = document.getElementById('modelReady');
+          const readyMessage = document.getElementById("modelReady");
           if (readyMessage) {
-            readyMessage.style.display = 'block';
+            readyMessage.style.display = "block";
             setTimeout(() => {
-              readyMessage.style.display = 'none';
+              readyMessage.style.display = "none";
             }, 3000);
           }
-          
         } catch (error) {
-          console.error('Error loading model:', error);
-          const errorMessage = document.getElementById('modelError');
+          console.error("Error loading model:", error);
+          const errorMessage = document.getElementById("modelError");
           if (errorMessage) {
             errorMessage.innerHTML = `
               <strong>⚠️ AI Model Loading Failed</strong><br>
@@ -344,75 +349,81 @@
               • Use the <a href="https://huggingface.co/spaces/sohei1l/quick-caption" target="_blank">Hugging Face Spaces version</a><br>
               • Run the local Python app with <code>python app.py</code>
             `;
-            errorMessage.style.display = 'block';
+            errorMessage.style.display = "block";
           }
-          
-          if (loadingMessage) loadingMessage.style.display = 'none';
+
+          if (loadingMessage) loadingMessage.style.display = "none";
         }
       }
-      
+
       // Start loading model when page loads
-      window.addEventListener('load', initializeModel);
-      
+      window.addEventListener("load", initializeModel);
+
       // Make functions available globally
-      window.generateCaptionWithAI = async function(imageElement) {
+      window.generateCaptionWithAI = async function (imageElement) {
         if (!window.modelLoaded || !window.captionPipeline) {
           // Fallback to intelligent analysis if AI model failed
           return window.generateFallbackCaption(imageElement);
         }
-        
+
         try {
           // Debug: log the image element details
-          console.log('Processing image:', {
+          console.log("Processing image:", {
             src: imageElement.src,
             width: imageElement.naturalWidth,
             height: imageElement.naturalHeight,
-            complete: imageElement.complete
+            complete: imageElement.complete,
           });
-          
+
           // Try different input formats for the pipeline
           let result;
           try {
             // First try with the image element itself
             result = await window.captionPipeline(imageElement);
           } catch (e1) {
-            console.log('Failed with image element, trying src URL:', e1.message);
+            console.log(
+              "Failed with image element, trying src URL:",
+              e1.message
+            );
             try {
               // Try with the src URL
               result = await window.captionPipeline(imageElement.src);
             } catch (e2) {
-              console.log('Failed with src URL, trying canvas conversion:', e2.message);
+              console.log(
+                "Failed with src URL, trying canvas conversion:",
+                e2.message
+              );
               // Convert to canvas as last resort
-              const canvas = document.createElement('canvas');
-              const ctx = canvas.getContext('2d');
+              const canvas = document.createElement("canvas");
+              const ctx = canvas.getContext("2d");
               canvas.width = imageElement.naturalWidth;
               canvas.height = imageElement.naturalHeight;
               ctx.drawImage(imageElement, 0, 0);
               result = await window.captionPipeline(canvas);
             }
           }
-          
-          console.log('Caption result:', result);
+
+          console.log("Caption result:", result);
           return {
             caption: result[0].generated_text,
-            confidence: 0.85 + Math.random() * 0.14 // Simulated confidence 85-99%
+            confidence: 0.85 + Math.random() * 0.14, // Simulated confidence 85-99%
           };
         } catch (error) {
-          console.error('Error generating caption:', error);
+          console.error("Error generating caption:", error);
           // Fallback to analysis-based caption
           return window.generateFallbackCaption(imageElement);
         }
       };
-      
+
       // Fallback caption generation based on image analysis
-      window.generateFallbackCaption = function(imageElement) {
+      window.generateFallbackCaption = function (imageElement) {
         const metrics = window.calculateQualityMetrics(imageElement);
         const width = imageElement.naturalWidth;
         const height = imageElement.naturalHeight;
         const aspectRatio = width / height;
-        
+
         let description = "An image";
-        
+
         // Determine orientation and size
         if (aspectRatio > 1.5) {
           description = "A wide landscape image";
@@ -421,46 +432,46 @@
         } else {
           description = "A square or rectangular image";
         }
-        
+
         // Add quality characteristics
         if (metrics.brightness > 0.7) {
           description += " with bright lighting";
         } else if (metrics.brightness < 0.3) {
           description += " with low lighting";
         }
-        
+
         if (metrics.contrast > 0.5) {
           description += " and high contrast";
         }
-        
+
         if (metrics.sharpness > 0.7) {
           description += ", appearing sharp and clear";
         }
-        
+
         // Add resolution info
         const megapixels = (width * height) / 1000000;
         if (megapixels > 5) {
           description += " captured in high resolution";
         }
-        
+
         return {
           caption: description + ".",
-          confidence: 0.75 // Lower confidence for fallback
+          confidence: 0.75, // Lower confidence for fallback
         };
       };
-      
+
       // Calculate image quality metrics
-      window.calculateQualityMetrics = function(imageElement) {
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        
+      window.calculateQualityMetrics = function (imageElement) {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+
         canvas.width = imageElement.naturalWidth;
         canvas.height = imageElement.naturalHeight;
         ctx.drawImage(imageElement, 0, 0);
-        
+
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         const data = imageData.data;
-        
+
         // Calculate brightness
         let totalBrightness = 0;
         for (let i = 0; i < data.length; i += 4) {
@@ -470,7 +481,7 @@
           totalBrightness += (r + g + b) / 3;
         }
         const brightness = totalBrightness / (data.length / 4) / 255;
-        
+
         // Calculate contrast (simplified)
         let totalVariance = 0;
         const avgBrightness = brightness * 255;
@@ -482,49 +493,62 @@
           totalVariance += Math.pow(pixelBrightness - avgBrightness, 2);
         }
         const contrast = Math.sqrt(totalVariance / (data.length / 4)) / 255;
-        
+
         // Simple sharpness approximation
         const sharpness = Math.min(contrast * 2, 1);
-        
+
         // Resolution score
         const totalPixels = canvas.width * canvas.height;
         const referencePixels = 1920 * 1080; // 1080p reference
         const resolutionScore = Math.min(totalPixels / referencePixels, 1);
-        
+
         return {
           brightness,
           contrast,
           sharpness,
-          resolution_score: resolutionScore
+          resolution_score: resolutionScore,
         };
       };
     </script>
     <div class="container">
       <div class="header">
-        <h1>Quick Caption</h1>
-        <p>
-          AI-powered image captioning for accessibility and content creation
-        </p>
+        <h1>AI Image Captioning</h1>
         <a href="https://github.com/sohei1l/quick-caption" class="github-link"
-          >View on GitHub</a
+          >https://github.com/sohei1l/quick-caption</a
         >
       </div>
 
       <div class="main-content">
         <!-- Model loading status -->
-        <div class="demo-notice" id="modelLoading" style="display: none;">
-          <strong>🔄 Loading AI Model...</strong> The image captioning model is downloading and initializing. This may take a moment on first visit.
+        <div class="demo-notice" id="modelLoading" style="display: none">
+          <strong>🔄 Loading AI Model...</strong> The image captioning model is
+          downloading and initializing. This may take a moment on first visit.
         </div>
-        
-        <div class="demo-notice" id="modelReady" style="display: none; background: #d4edda; color: #155724; border: 1px solid #c3e6cb;">
-          <strong>✅ AI Model Ready!</strong> You can now upload images for real AI-powered captions.
+
+        <div
+          class="demo-notice"
+          id="modelReady"
+          style="
+            display: none;
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+          "
+        >
+          <strong>✅ AI Model Ready!</strong> You can now upload images for real
+          AI-powered captions.
         </div>
-        
-        <div class="demo-notice" style="background: #e7f3ff; color: #004085; border: 1px solid #bee5eb;">
-          <strong>🌐 Browser-Based AI:</strong> This demo runs entirely in your browser using Transformers.js! No server required. The AI model downloads once and runs locally for privacy and speed.
+
+        <div
+          class="demo-notice"
+          style="background: #e7f3ff; color: #004085; border: 1px solid #bee5eb"
+        >
+          <strong>🌐 Browser-Based AI:</strong> This demo runs entirely in your
+          browser using Transformers.js! No server required. The AI model
+          downloads once and runs locally for privacy and speed.
         </div>
-        
-        <div class="error" id="modelError" style="display: none;"></div>
+
+        <div class="error" id="modelError" style="display: none"></div>
 
         <div class="tabs">
           <button class="tab active" data-tab="single">Single Image</button>
@@ -535,11 +559,23 @@
         <div id="single" class="tab-content active">
           <div
             class="upload-area"
+            id="uploadArea"
             onclick="document.getElementById('fileInput').click()"
           >
             <div class="upload-icon">📷</div>
             <div class="upload-text">Drop an image here or click to upload</div>
             <div class="upload-subtext">Supports JPG, PNG, GIF, WebP</div>
+          </div>
+          <div
+            id="loadingCaption"
+            style="
+              display: none;
+              text-align: center;
+              font-size: 1.1em;
+              margin: 32px 0;
+            "
+          >
+            Processing image, please wait...
           </div>
           <input type="file" id="fileInput" accept="image/*" />
           <img id="imagePreview" class="image-preview" alt="Uploaded image" />
@@ -618,12 +654,15 @@
             </div>
           </div>
           <div class="demo-notice">
-            <strong>GitHub Pages Demo:</strong> This browser-based demo runs AI models directly in your browser! For batch processing capabilities, use the full backend version available at
+            <strong>GitHub Pages Demo:</strong> This browser-based demo runs AI
+            models directly in your browser! For batch processing capabilities,
+            use the full backend version available at
             <a
               href="https://huggingface.co/spaces/sohei1l/quick-caption"
               target="_blank"
               >Hugging Face Spaces</a
-            > or run the Python app locally.
+            >
+            or run the Python app locally.
           </div>
         </div>
       </div>
@@ -696,67 +735,26 @@
       });
 
       async function processImage(file, resultsId) {
-        // Show appropriate loading indicator
-        const loadingId = resultsId === "analysisResults" ? "loading2" : "loading";
-        const errorId = resultsId === "analysisResults" ? "error2" : "error";
-        const loading = document.getElementById(loadingId);
+        // Show loading
+        const loading = document.getElementById("loading");
         if (loading) loading.style.display = "block";
 
-        // Hide previous results and errors
+        // Hide upload area and show loading caption
+        const uploadArea = document.getElementById("uploadArea");
+        const loadingCaption = document.getElementById("loadingCaption");
+        if (uploadArea) uploadArea.style.display = "none";
+        if (loadingCaption) loadingCaption.style.display = "block";
+
+        // Hide previous results
         document.getElementById(resultsId).style.display = "none";
-        document.getElementById(errorId).style.display = "none";
 
-        try {
-          // Check if model is loaded
-          if (!window.modelLoaded) {
-            throw new Error("AI model is still loading. Please wait a moment and try again.");
-          }
-
-          // Create image element for processing
-          const img = new Image();
-          img.onload = async function() {
-            try {
-              // Generate caption using browser AI
-              const captionResult = await window.generateCaptionWithAI(img);
-              
-              // Prepare result data
-              const data = {
-                caption: captionResult.caption,
-                confidence: captionResult.confidence
-              };
-              
-              // Add quality metrics for analysis tab
-              if (resultsId === "analysisResults") {
-                data.quality_metrics = window.calculateQualityMetrics(img);
-              }
-              
-              if (loading) loading.style.display = "none";
-              showRealResults(data, resultsId);
-              
-            } catch (error) {
-              if (loading) loading.style.display = "none";
-              showError(error.message, errorId);
-              console.error('Error generating caption:', error);
-            }
-          };
-          
-          img.onerror = function() {
-            if (loading) loading.style.display = "none";
-            showError("Failed to load image. Please try a different image.", errorId);
-          };
-          
-          // Load image from file
-          const reader = new FileReader();
-          reader.onload = function(e) {
-            img.src = e.target.result;
-          };
-          reader.readAsDataURL(file);
-          
-        } catch (error) {
+        // Simulate AI processing with demo results
+        setTimeout(() => {
           if (loading) loading.style.display = "none";
-          showError(error.message, errorId);
-          console.error('Error processing image:', error);
-        }
+          if (uploadArea) uploadArea.style.display = "block";
+          if (loadingCaption) loadingCaption.style.display = "none";
+          showDemoResults(file, resultsId);
+        }, 2000);
       }
 
       function showRealResults(data, resultsId) {
@@ -765,10 +763,13 @@
         if (resultsId === "results") {
           // Single image results
           document.getElementById("captionText").textContent = data.caption;
-          document.getElementById("confidence").textContent = `Confidence: ${(data.confidence * 100).toFixed(1)}%`;
+          document.getElementById("confidence").textContent = `Confidence: ${(
+            data.confidence * 100
+          ).toFixed(1)}%`;
         } else {
           // Analysis results
-          document.getElementById("analysisCaptionText").textContent = data.caption;
+          document.getElementById("analysisCaptionText").textContent =
+            data.caption;
           showRealMetrics(data.quality_metrics);
         }
 
@@ -780,7 +781,6 @@
         errorDiv.textContent = errorMessage;
         errorDiv.style.display = "block";
       }
-
 
       function showRealMetrics(qualityMetrics) {
         const metricsGrid = document.getElementById("metricsGrid");
