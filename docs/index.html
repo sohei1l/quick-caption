@@ -290,11 +290,11 @@
           const loadingMessage = document.getElementById('modelLoading');
           if (loadingMessage) loadingMessage.style.display = 'block';
           
-          // Try different models in order of preference
+          // Try different models in order of preference (vit-gpt2 seems to work best)
           const modelOptions = [
             'Xenova/vit-gpt2-image-captioning',
-            'Xenova/blip-image-captioning-large', 
-            'Xenova/blip-image-captioning-base'
+            'Xenova/blip-image-captioning-base',
+            'Xenova/blip-image-captioning-large'
           ];
           
           let modelLoaded = false;
@@ -362,7 +362,37 @@
         }
         
         try {
-          const result = await window.captionPipeline(imageElement);
+          // Debug: log the image element details
+          console.log('Processing image:', {
+            src: imageElement.src,
+            width: imageElement.naturalWidth,
+            height: imageElement.naturalHeight,
+            complete: imageElement.complete
+          });
+          
+          // Try different input formats for the pipeline
+          let result;
+          try {
+            // First try with the image element itself
+            result = await window.captionPipeline(imageElement);
+          } catch (e1) {
+            console.log('Failed with image element, trying src URL:', e1.message);
+            try {
+              // Try with the src URL
+              result = await window.captionPipeline(imageElement.src);
+            } catch (e2) {
+              console.log('Failed with src URL, trying canvas conversion:', e2.message);
+              // Convert to canvas as last resort
+              const canvas = document.createElement('canvas');
+              const ctx = canvas.getContext('2d');
+              canvas.width = imageElement.naturalWidth;
+              canvas.height = imageElement.naturalHeight;
+              ctx.drawImage(imageElement, 0, 0);
+              result = await window.captionPipeline(canvas);
+            }
+          }
+          
+          console.log('Caption result:', result);
           return {
             caption: result[0].generated_text,
             confidence: 0.85 + Math.random() * 0.14 // Simulated confidence 85-99%
