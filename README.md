@@ -2,6 +2,11 @@
 
 Small, fast, and useful: drop an image, get a crisp accessibility caption powered by a Hugging Face vision-language model.
 
+## 🚀 Live Demo
+Try QuickCaption now: **[https://sohei1l.github.io/quick-caption/](https://sohei1l.github.io/quick-caption/)**
+
+*For full AI-powered captioning with the complete machine learning backend, visit the [Hugging Face Spaces deployment](https://huggingface.co/spaces/sohei1l/quick-caption).*
+
 ## Features
 - 🖼️ Drag-and-drop image captioning
 - 📊 Confidence scoring for caption reliability
