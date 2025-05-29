@@ -4,7 +4,7 @@ Small, fast, and useful: drop an image, get an accessibility caption powered by 
 
 ## Live Demo
 
-Try QuickCaption now: **[https://sohei1l.github.io/quick-caption/](https://sohei1l.github.io/quick-caption/)**
+[![Demo](https://img.shields.io/badge/Live%20Demo-QuickCaption-blue?style=for-the-badge)](https://sohei1l.github.io/quick-caption/)
 
 ## Features
 
