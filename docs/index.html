@@ -74,23 +74,19 @@
         font-weight: 600;
       }
 
-      .tab-content {
-        display: none;
-      }
-
-      .tab-content.active {
-        display: block;
-      }
 
       .upload-area {
         border: 3px dashed #667eea;
         border-radius: 15px;
-        padding: 40px;
+        padding: 30px 20px;
         text-align: center;
-        background: #f8f9ff;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
         transition: all 0.3s ease;
         cursor: pointer;
         margin-bottom: 20px;
+        max-width: 400px;
+        margin-left: auto;
+        margin-right: auto;
       }
 
       .upload-area:hover {
@@ -105,9 +101,9 @@
       }
 
       .upload-icon {
-        font-size: 3em;
+        font-size: 2.5em;
         color: #667eea;
-        margin-bottom: 15px;
+        margin-bottom: 12px;
       }
 
       .upload-text {
@@ -567,8 +563,8 @@
     <div class="container">
       <div class="header">
         <h1>AI Image Captioning</h1>
-        <p style="margin: 0.5em 0; color: #666; font-size: 1.1em;">Powered by VIT-GPT2 Model</p>
-        <a href="https://github.com/sohei1l/quick-caption" class="github-link"
+        <p style="margin: 0.5em 0; color: #f8f9fa; font-size: 1.1em;">Powered by VIT-GPT2 Model</p>
+        <a href="https://github.com/sohei1l/quick-caption" style="color: #667eea; text-decoration: underline; font-size: 0.9em;"
           >https://github.com/sohei1l/quick-caption</a
         >
       </div>
@@ -597,34 +593,25 @@
 
         <div class="error" id="modelError" style="display: none"></div>
 
-        <div class="tabs">
-          <button class="tab active" data-tab="single">Single Image</button>
-          <button class="tab" data-tab="analysis">Detailed Analysis</button>
-          <!-- <button class="tab" data-tab="batch">Batch Processing</button> -->
-        </div>
 
-        <div id="single" class="tab-content active">
+        <div class="analysis-container">
           <div
             class="upload-area"
-            id="uploadArea"
             onclick="document.getElementById('fileInput').click()"
           >
-            <div class="upload-icon">📷</div>
+            <div class="upload-icon">🖼️</div>
             <div class="upload-text">Drop an image here or click to upload</div>
-            <div class="upload-subtext">Supports JPG, PNG, GIF, WebP</div>
-          </div>
-          <div class="loading" id="loadingCaption">
-            <div class="spinner"></div>
-            <div class="loading-text">🤖 AI is analyzing your image...</div>
-            <div class="loading-subtext">This may take a few moments for the first analysis</div>
+            <div class="upload-subtext">
+              Get AI-powered captions and quality analysis
+            </div>
           </div>
           <input type="file" id="fileInput" accept="image/*" />
           <img id="imagePreview" class="image-preview" alt="Uploaded image" />
 
           <div class="loading" id="loading">
             <div class="spinner"></div>
-            <div class="loading-text">🤖 AI is analyzing your image...</div>
-            <div class="loading-subtext">Generating accessibility caption...</div>
+            <div class="loading-text">🔍 Performing detailed analysis...</div>
+            <div class="loading-subtext">Analyzing quality metrics and generating caption...</div>
           </div>
 
           <div class="error" id="error"></div>
@@ -633,7 +620,10 @@
             <div class="result-item">
               <div class="result-label">Generated Caption</div>
               <div class="result-content" id="caption">
-                <button class="copy-btn" onclick="copyToClipboard('caption')">
+                <button
+                  class="copy-btn"
+                  onclick="copyToClipboard('caption')"
+                >
                   Copy
                 </button>
                 <span id="captionText"></span>
@@ -643,91 +633,19 @@
               <div class="result-label">Confidence Score</div>
               <div class="result-content" id="confidence"></div>
             </div>
-          </div>
-        </div>
-
-        <div id="analysis" class="tab-content">
-          <div
-            class="upload-area"
-            onclick="document.getElementById('fileInput2').click()"
-          >
-            <div class="upload-icon">🔍</div>
-            <div class="upload-text">Upload image for detailed analysis</div>
-            <div class="upload-subtext">
-              Get comprehensive quality metrics and captioning
-            </div>
-          </div>
-          <input type="file" id="fileInput2" accept="image/*" />
-          <img id="imagePreview2" class="image-preview" alt="Uploaded image" />
-
-          <div class="loading" id="loading2">
-            <div class="spinner"></div>
-            <div class="loading-text">🔍 Performing detailed analysis...</div>
-            <div class="loading-subtext">Analyzing quality metrics and generating caption...</div>
-          </div>
-
-          <div class="error" id="error2"></div>
-
-          <div class="result-area" id="analysisResults">
             <div class="result-item">
-              <div class="result-label">Generated Caption</div>
-              <div class="result-content" id="analysisCaption">
-                <button
-                  class="copy-btn"
-                  onclick="copyToClipboard('analysisCaption')"
-                >
-                  Copy
-                </button>
-                <span id="analysisCaptionText"></span>
+              <div class="result-label">Image Quality Analysis</div>
+              <div class="result-content">
+                <div class="metrics-grid" id="metricsGrid"></div>
               </div>
             </div>
-            <div class="result-item">
-              <div class="result-label">Image Quality Metrics</div>
-              <div class="metrics-grid" id="metricsGrid"></div>
-            </div>
           </div>
         </div>
 
-        <div id="batch" class="tab-content">
-          <div class="upload-area">
-            <div class="upload-icon">📦</div>
-            <div class="upload-text">Batch Processing</div>
-            <div class="upload-subtext">
-              Upload a ZIP file containing multiple images
-            </div>
-          </div>
-          <div class="demo-notice">
-            <strong>GitHub Pages Demo:</strong> This browser-based demo runs AI
-            models directly in your browser! For batch processing capabilities,
-            use the full backend version available at
-            <a
-              href="https://huggingface.co/spaces/sohei1l/quick-caption"
-              target="_blank"
-              >Hugging Face Spaces</a
-            >
-            or run the Python app locally.
-          </div>
-        </div>
       </div>
     </div>
 
     <script>
-      // Tab functionality
-      document.querySelectorAll(".tab").forEach((tab) => {
-        tab.addEventListener("click", () => {
-          // Remove active class from all tabs and contents
-          document
-            .querySelectorAll(".tab")
-            .forEach((t) => t.classList.remove("active"));
-          document
-            .querySelectorAll(".tab-content")
-            .forEach((c) => c.classList.remove("active"));
-
-          // Add active class to clicked tab and corresponding content
-          tab.classList.add("active");
-          document.getElementById(tab.dataset.tab).classList.add("active");
-        });
-      });
 
       // File upload handlers
       function setupFileUpload(fileInputId, previewId, resultsId) {
@@ -758,9 +676,8 @@
         });
       }
 
-      // Setup both file inputs
+      // Setup file input
       setupFileUpload("fileInput", "imagePreview", "results");
-      setupFileUpload("fileInput2", "imagePreview2", "analysisResults");
 
       // Drag and drop functionality
       document.querySelectorAll(".upload-area").forEach((area) => {
@@ -786,35 +703,22 @@
       });
 
       async function processImage(file, resultsId) {
-        // Determine which loading element to use
-        const loadingId = resultsId === "analysisResults" ? "loading2" : "loading";
-        const errorId = resultsId === "analysisResults" ? "error2" : "error";
-        const uploadAreaId = resultsId === "analysisResults" ? null : "uploadArea";
-        const loadingCaptionId = resultsId === "analysisResults" ? null : "loadingCaption";
-        
-        // Show appropriate loading indicator with smooth transition
-        const loading = document.getElementById(loadingId);
+        // Show loading indicator with smooth transition
+        const loading = document.getElementById("loading");
         if (loading) {
           loading.style.display = "block";
           loading.classList.add("active");
         }
-        
-        // Show loading caption for single image tab
-        const loadingCaption = document.getElementById(loadingCaptionId);
-        if (loadingCaption) {
-          loadingCaption.style.display = "block";
-          loadingCaption.classList.add("active");
-        }
 
         // Add processing state to upload area
-        const uploadArea = document.getElementById(uploadAreaId);
+        const uploadArea = document.querySelector(".upload-area");
         if (uploadArea) {
           uploadArea.classList.add("processing");
         }
 
         // Hide previous results and errors
-        document.getElementById(resultsId).style.display = "none";
-        document.getElementById(errorId).style.display = "none";
+        document.getElementById("results").style.display = "none";
+        document.getElementById("error").style.display = "none";
 
         try {
           // Check if model is loaded
@@ -835,24 +739,18 @@
                 confidence: captionResult.confidence
               };
               
-              // Add quality metrics for analysis tab
-              if (resultsId === "analysisResults") {
-                data.quality_metrics = window.calculateQualityMetrics(img);
-              }
+              // Add quality metrics
+              data.quality_metrics = window.calculateQualityMetrics(img);
               
               // Hide loading with smooth transition
               if (loading) {
                 loading.classList.remove("active");
                 setTimeout(() => loading.style.display = "none", 300);
               }
-              if (loadingCaption) {
-                loadingCaption.classList.remove("active");
-                setTimeout(() => loadingCaption.style.display = "none", 300);
-              }
               if (uploadArea) {
                 uploadArea.classList.remove("processing");
               }
-              showRealResults(data, resultsId);
+              showRealResults(data, "results");
               
             } catch (error) {
               // Hide loading with smooth transition
@@ -860,14 +758,10 @@
                 loading.classList.remove("active");
                 setTimeout(() => loading.style.display = "none", 300);
               }
-              if (loadingCaption) {
-                loadingCaption.classList.remove("active");
-                setTimeout(() => loadingCaption.style.display = "none", 300);
-              }
               if (uploadArea) {
                 uploadArea.classList.remove("processing");
               }
-              showError(error.message, errorId);
+              showError(error.message, "error");
               console.error('Error generating caption:', error);
             }
           };
@@ -878,14 +772,10 @@
               loading.classList.remove("active");
               setTimeout(() => loading.style.display = "none", 300);
             }
-            if (loadingCaption) {
-              loadingCaption.classList.remove("active");
-              setTimeout(() => loadingCaption.style.display = "none", 300);
-            }
             if (uploadArea) {
               uploadArea.classList.remove("processing");
             }
-            showError("Failed to load image. Please try a different image.", errorId);
+            showError("Failed to load image. Please try a different image.", "error");
           };
           
           // Load image from file
@@ -901,33 +791,25 @@
             loading.classList.remove("active");
             setTimeout(() => loading.style.display = "none", 300);
           }
-          if (loadingCaption) {
-            loadingCaption.classList.remove("active");
-            setTimeout(() => loadingCaption.style.display = "none", 300);
-          }
           if (uploadArea) {
             uploadArea.classList.remove("processing");
           }
-          showError(error.message, errorId);
+          showError(error.message, "error");
           console.error('Error processing image:', error);
         }
       }
 
       function showRealResults(data, resultsId) {
-        const results = document.getElementById(resultsId);
+        const results = document.getElementById("results");
 
-        if (resultsId === "results") {
-          // Single image results
-          document.getElementById("captionText").textContent = data.caption;
-          document.getElementById("confidence").textContent = `Confidence: ${(
-            data.confidence * 100
-          ).toFixed(1)}%`;
-        } else {
-          // Analysis results
-          document.getElementById("analysisCaptionText").textContent =
-            data.caption;
-          showRealMetrics(data.quality_metrics);
-        }
+        // Show caption and confidence
+        document.getElementById("captionText").textContent = data.caption;
+        document.getElementById("confidence").textContent = `Confidence: ${(
+          data.confidence * 100
+        ).toFixed(1)}%`;
+        
+        // Show quality metrics
+        showRealMetrics(data.quality_metrics);
 
         results.style.display = "block";
       }
