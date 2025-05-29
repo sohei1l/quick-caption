@@ -1,4 +1,4 @@
-from transformers import BlipProcessor, BlipForConditionalGeneration
+from transformers import Blip2Processor, Blip2ForConditionalGeneration
 from PIL import Image
 import torch
 import torch.nn.functional as F
@@ -11,9 +11,9 @@ class CaptionGenerator:
         self._load_model()
     
     def _load_model(self):
-        model_name = "Salesforce/blip-image-captioning-base"
-        self.processor = BlipProcessor.from_pretrained(model_name)
-        self.model = BlipForConditionalGeneration.from_pretrained(model_name)
+        model_name = "Salesforce/blip2-opt-2.7b"
+        self.processor = Blip2Processor.from_pretrained(model_name)
+        self.model = Blip2ForConditionalGeneration.from_pretrained(model_name, torch_dtype=torch.float16)
         
         if torch.cuda.is_available():
             self.model = self.model.to("cuda")
@@ -56,7 +56,7 @@ class CaptionGenerator:
             inputs = {k: v.to("cuda") for k, v in inputs.items()}
         
         with torch.no_grad():
-            outputs = self.model.generate(**inputs, max_length=50, num_beams=5, return_dict_in_generate=True, output_scores=True)
+            outputs = self.model.generate(**inputs, max_length=100, num_beams=8, do_sample=True, temperature=0.7, return_dict_in_generate=True, output_scores=True)
             
         caption = self.processor.decode(outputs.sequences[0], skip_special_tokens=True)
         
