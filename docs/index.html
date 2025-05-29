@@ -275,7 +275,7 @@
     <script type="module">
       import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2';
       
-      // Disable remote models (use local cache)
+      // Configure Transformers.js environment
       env.allowRemoteModels = true;
       env.allowLocalModels = true;
       
@@ -286,12 +286,34 @@
       // Initialize the model
       async function initializeModel() {
         try {
-          console.log('Loading BLIP model...');
+          console.log('Loading image captioning model...');
           const loadingMessage = document.getElementById('modelLoading');
           if (loadingMessage) loadingMessage.style.display = 'block';
           
-          // Use a smaller, browser-compatible image captioning model
-          window.captionPipeline = await pipeline('image-to-text', 'Xenova/blip-image-captioning-base');
+          // Try different models in order of preference
+          const modelOptions = [
+            'Xenova/vit-gpt2-image-captioning',
+            'Xenova/blip-image-captioning-large', 
+            'Xenova/blip-image-captioning-base'
+          ];
+          
+          let modelLoaded = false;
+          for (const modelName of modelOptions) {
+            try {
+              console.log(`Trying model: ${modelName}`);
+              window.captionPipeline = await pipeline('image-to-text', modelName);
+              console.log(`Successfully loaded: ${modelName}`);
+              modelLoaded = true;
+              break;
+            } catch (error) {
+              console.log(`Failed to load ${modelName}:`, error.message);
+              continue;
+            }
+          }
+          
+          if (!modelLoaded) {
+            throw new Error('Failed to load any captioning model');
+          }
           
           window.modelLoaded = true;
           console.log('Model loaded successfully!');
@@ -311,9 +333,21 @@
           console.error('Error loading model:', error);
           const errorMessage = document.getElementById('modelError');
           if (errorMessage) {
-            errorMessage.textContent = 'Failed to load AI model. Please refresh the page.';
+            errorMessage.innerHTML = `
+              <strong>⚠️ AI Model Loading Failed</strong><br>
+              The browser-based AI model couldn't be loaded. This might be due to:<br>
+              • Network connectivity issues<br>
+              • Hugging Face API restrictions<br>
+              • Browser compatibility<br><br>
+              <strong>Alternatives:</strong><br>
+              • Try refreshing the page<br>
+              • Use the <a href="https://huggingface.co/spaces/sohei1l/quick-caption" target="_blank">Hugging Face Spaces version</a><br>
+              • Run the local Python app with <code>python app.py</code>
+            `;
             errorMessage.style.display = 'block';
           }
+          
+          if (loadingMessage) loadingMessage.style.display = 'none';
         }
       }
       
@@ -323,7 +357,8 @@
       // Make functions available globally
       window.generateCaptionWithAI = async function(imageElement) {
         if (!window.modelLoaded || !window.captionPipeline) {
-          throw new Error('AI model not loaded yet. Please wait.');
+          // Fallback to intelligent analysis if AI model failed
+          return window.generateFallbackCaption(imageElement);
         }
         
         try {
@@ -334,8 +369,54 @@
           };
         } catch (error) {
           console.error('Error generating caption:', error);
-          throw error;
+          // Fallback to analysis-based caption
+          return window.generateFallbackCaption(imageElement);
         }
+      };
+      
+      // Fallback caption generation based on image analysis
+      window.generateFallbackCaption = function(imageElement) {
+        const metrics = window.calculateQualityMetrics(imageElement);
+        const width = imageElement.naturalWidth;
+        const height = imageElement.naturalHeight;
+        const aspectRatio = width / height;
+        
+        let description = "An image";
+        
+        // Determine orientation and size
+        if (aspectRatio > 1.5) {
+          description = "A wide landscape image";
+        } else if (aspectRatio < 0.7) {
+          description = "A tall portrait image";
+        } else {
+          description = "A square or rectangular image";
+        }
+        
+        // Add quality characteristics
+        if (metrics.brightness > 0.7) {
+          description += " with bright lighting";
+        } else if (metrics.brightness < 0.3) {
+          description += " with low lighting";
+        }
+        
+        if (metrics.contrast > 0.5) {
+          description += " and high contrast";
+        }
+        
+        if (metrics.sharpness > 0.7) {
+          description += ", appearing sharp and clear";
+        }
+        
+        // Add resolution info
+        const megapixels = (width * height) / 1000000;
+        if (megapixels > 5) {
+          description += " captured in high resolution";
+        }
+        
+        return {
+          caption: description + ".",
+          confidence: 0.75 // Lower confidence for fallback
+        };
       };
       
       // Calculate image quality metrics

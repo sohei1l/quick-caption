@@ -16,7 +16,7 @@ def start_server():
     # Change to docs directory
     os.chdir("docs")
     
-    PORT = 8080
+    PORT = 8888
     Handler = http.server.SimpleHTTPRequestHandler
     
     # Add CORS headers for local testing
